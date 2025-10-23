@@ -29,44 +29,59 @@ def extract_names_from_pdf(pdf_path):
             sorted_lines = sorted(lines_dict.items())
 
             current_section = None
-            previous_line_text = None
+            lines_list = [(y, ' '.join([w['text'] for w in sorted(words_in_line, key=lambda w: w['x0'])]).strip())
+                         for y, words_in_line in sorted_lines]
 
-            for y, words_in_line in sorted_lines:
-                words_in_line.sort(key=lambda w: w['x0'])
-                line_text = ' '.join([w['text'] for w in words_in_line]).strip()
+            i = 0
+            while i < len(lines_list):
+                y, line_text = lines_list[i]
 
+                # Identifica seções
                 if line_text in ['PÓS-FIXADO', 'PRÉ-FIXADO', 'JURO REAL - INFLAÇÃO', 'MULTIMERCADOS']:
                     current_section = line_text
-                    previous_line_text = None
+                    i += 1
                     continue
 
-                if not line_text or 'RENDA FIXA' in line_text or 'Data de' in line_text:
-                    previous_line_text = None
+                # Ignora linhas irrelevantes
+                if not line_text or 'RENDA FIXA' in line_text or 'Data de' in line_text or line_text.startswith('Total') or line_text == 'ALTERNATIVOS' or 'Página' in line_text:
+                    i += 1
                     continue
 
-                if line_text.startswith('Total') or line_text == 'ALTERNATIVOS':
-                    previous_line_text = None
-                    continue
-
-                # Linha com dados
+                # Linha com dados (tem data dd/mm/aa)
                 if current_section and re.search(r'\d{2}/\d{2}/\d{2}', line_text):
-                    # Extrai nome (captura tudo até a primeira data)
+                    # Tenta extrair nome da mesma linha primeiro
                     nome_match = re.match(r'^(.+?)\s+\d{2}/\d{2}/\d{2}', line_text)
 
                     if nome_match:
+                        # Nome está na mesma linha
                         nome = nome_match.group(1).strip()
-                    elif previous_line_text and previous_line_text not in ['Total', 'ALTERNATIVOS']:
-                        nome = previous_line_text
-                        # Limpa indexadores do final
-                        nome = re.sub(r'\s+(CDI|PRE|IPCA)[\s_\d\-]*$', '', nome).strip()
                     else:
-                        nome = None
+                        # Nome está em linhas anteriores
+                        nome_parts = []
+
+                        # Olha linha anterior
+                        if i > 0:
+                            prev_line = lines_list[i-1][1]
+                            if prev_line and prev_line not in ['PÓS-FIXADO', 'PRÉ-FIXADO', 'JURO REAL - INFLAÇÃO', 'MULTIMERCADOS', 'Total', 'ALTERNATIVOS', 'RENDA FIXA'] and 'Data de' not in prev_line and 'Página' not in prev_line:
+                                # Limpa indexadores
+                                prev_line_clean = re.sub(r'\s+(CDI|PRE|IPCA)[\s_\d\-]*$', '', prev_line).strip()
+                                nome_parts.append(prev_line_clean)
+
+                        # Olha linha seguinte (alguns nomes continuam após os dados)
+                        if i + 1 < len(lines_list):
+                            next_line = lines_list[i+1][1]
+                            # Linha seguinte tem continuação do nome se NÃO for uma linha de dados nem cabeçalho
+                            if next_line and not re.search(r'\d{2}/\d{2}/\d{2}', next_line) and next_line not in ['PÓS-FIXADO', 'PRÉ-FIXADO', 'JURO REAL - INFLAÇÃO', 'MULTIMERCADOS', 'Total', 'ALTERNATIVOS'] and 'Data de' not in next_line and 'Página' not in next_line:
+                                # Extrai apenas texto antes de números (ex: "GLP 100.00" -> "GLP")
+                                next_clean = re.sub(r'\s+[\d\.,]+$', '', next_line).strip()
+                                if next_clean and not next_clean.replace('.', '').replace(',', '').isdigit():
+                                    nome_parts.append(next_clean)
+
+                        nome = ' '.join(nome_parts) if nome_parts else None
 
                     names.append(nome)
-                    previous_line_text = None
-                else:
-                    if line_text and line_text not in ['Total', 'ALTERNATIVOS']:
-                        previous_line_text = line_text
+
+                i += 1
 
     return names
 
