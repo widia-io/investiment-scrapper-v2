@@ -281,19 +281,86 @@ def validate_cnpj_brasil_api(cnpj):
         return None
 
 
-def search_cnpj_complete(nome_ativo, cache, verbose=True):
+def search_cnpj_alternative_names(empresa_nome):
+    """
+    Usa LLM para sugerir CNPJs alternativos quando a busca inicial falha.
+    Útil para subsidiárias, holdings, empresas com nome diferente na Receita Federal.
+
+    Args:
+        empresa_nome: Nome da empresa (ex: "BROOKFIELD INCORPORACOES BRASIL S.A.")
+
+    Returns:
+        Lista de CNPJs candidatos alternativos
+    """
+
+    if not empresa_nome:
+        return []
+
+    prompt = f"""A empresa "{empresa_nome}" não teve CNPJ encontrado nas bases oficiais.
+
+Considerando que:
+1. Pode ser uma subsidiária ou holding
+2. Pode ter nome diferente na Receita Federal
+3. Pode ter variações no nome (LTDA vs S.A., abreviações, etc.)
+4. Pode ser uma empresa relacionada ou grupo empresarial
+
+Liste CNPJs alternativos REAIS que você conhece para empresas relacionadas ou com nomes similares.
+
+Retorne no formato:
+CNPJ: 12345678901234
+
+IMPORTANTE: Seja conservador - apenas sugira CNPJs que você tem razoável certeza que existem.
+Se não souber, retorne "NÃO ENCONTRADO"."""
+
+    try:
+        client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=os.getenv("OPENROUTER_API_KEY")
+        )
+
+        response = client.chat.completions.create(
+            model="anthropic/claude-3.5-sonnet",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2,
+            max_tokens=300
+        )
+
+        result = response.choices[0].message.content.strip()
+
+        if "NÃO ENCONTRADO" in result.upper() or "NAO ENCONTRADO" in result.upper():
+            return []
+
+        # Extrai CNPJs
+        cnpjs = []
+        for line in result.split('\n'):
+            if 'CNPJ:' in line or 'CNPJ' in line:
+                cnpj = clean_cnpj(line.split('CNPJ')[-1])
+                if cnpj and len(cnpj) == 14:
+                    cnpjs.append(cnpj)
+
+        return cnpjs[:3]
+
+    except Exception as e:
+        print(f"⚠️  Erro ao buscar variações: {e}")
+        return []
+
+
+def search_cnpj_complete(nome_ativo, cache, verbose=True, use_web_search=True):
     """
     Busca completa de CNPJ com estratégia híbrida:
     1. Verifica cache
     2. Usa LLM para extrair nome da empresa
-    3. Usa LLM para sugerir CNPJs candidatos
+    3. Usa LLM para sugerir CNPJs candidatos (da memória)
     4. Valida CNPJs nas APIs (ReceitaWS → BrasilAPI)
-    5. Salva no cache
+    5. Se falhar, usa GPT-4o com web search 🆕
+    6. Valida CNPJs encontrados na web
+    7. Salva no cache
 
     Args:
         nome_ativo: Nome do ativo (ex: "CRI - BROOKFIELD, VIA PORTFÓLIO GLP")
         cache: Dicionário de cache
         verbose: Se True, imprime progresso
+        use_web_search: Se True, usa GPT-4o com web search como fallback
 
     Returns:
         dict com 'cnpj', 'empresa', 'razao_social', 'source' ou None
@@ -376,9 +443,62 @@ def search_cnpj_complete(nome_ativo, cache, verbose=True):
                 'source': resultado['source']
             }
 
-    # Nenhum candidato validado
+    # Nenhum candidato validado - tenta buscar variações/subsidiárias
+    if use_web_search:
+        if verbose:
+            print("   ⚠️  CNPJs da memória não validaram")
+            print("   🔄 Buscando variações/subsidiárias/empresas relacionadas...")
+
+        cnpj_alt = search_cnpj_alternative_names(empresa_nome)
+
+        if cnpj_alt:
+            if verbose:
+                print(f"   ✓ {len(cnpj_alt)} CNPJ(s) alternativo(s) encontrado(s)")
+
+            # Valida cada CNPJ alternativo
+            for i, cnpj_candidato in enumerate(cnpj_alt, 1):
+                if verbose:
+                    print(f"   🌐 Validando alternativa {i}/{len(cnpj_alt)}: {format_cnpj(cnpj_candidato)}...")
+
+                # Tenta ReceitaWS
+                resultado = validate_cnpj_receita_ws(cnpj_candidato)
+
+                # Se falhar, tenta BrasilAPI
+                if not resultado:
+                    resultado = validate_cnpj_brasil_api(cnpj_candidato)
+
+                if resultado:
+                    # Encontrou e validou via variação/subsidiária!
+                    if verbose:
+                        print(f"   ✅ CNPJ validado (alternativo): {resultado['cnpj']}")
+                        print(f"   📋 Razão Social: {resultado['razao_social']}")
+                        print(f"   📍 Situação: {resultado['situacao']}")
+
+                    # Salva no cache com flag de alternativo
+                    cache[nome_ativo] = {
+                        'empresa': empresa_nome,
+                        'cnpj': resultado['cnpj'],
+                        'razao_social': resultado['razao_social'],
+                        'situacao': resultado['situacao'],
+                        'timestamp': datetime.now().isoformat(),
+                        'source': resultado['source'] + '_alternative'
+                    }
+                    save_cache(cache)
+
+                    return {
+                        'cnpj': resultado['cnpj'],
+                        'empresa': empresa_nome,
+                        'razao_social': resultado['razao_social'],
+                        'situacao': resultado['situacao'],
+                        'source': resultado['source'] + '_alternative'
+                    }
+        else:
+            if verbose:
+                print("   ❌ Busca de variações não encontrou CNPJs")
+
+    # Nenhum candidato validado (nem memória, nem web search)
     if verbose:
-        print(f"   ❌ Nenhum CNPJ validado nas APIs")
+        print("   ❌ CNPJ não encontrado após todas as tentativas")
 
     return None
 

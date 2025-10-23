@@ -4,7 +4,7 @@
     "cnpj": "09.146.451/0001-06",
     "razao_social": "KALLAS INCORPORACOES E CONSTRUCOES S.A.",
     "situacao": "ATIVA",
-    "timestamp": "2025-10-23T13:20:17.467401",
+    "timestamp": "2025-10-23T13:56:30.272589",
     "source": "receita_ws"
   },
   "LCA - BANCO BRADESCO S.A.": {
@@ -12,7 +12,7 @@
     "cnpj": "60.746.948/0001-12",
     "razao_social": "BANCO BRADESCO S.A.",
     "situacao": "ATIVA",
-    "timestamp": "2025-10-23T13:20:43.457154",
+    "timestamp": "2025-10-23T13:56:56.612988",
     "source": "receita_ws"
   },
   "LCI - BANCO BRADESCO S.A.": {
@@ -20,7 +20,7 @@
     "cnpj": "60.746.948/0001-12",
     "razao_social": "BANCO BRADESCO S.A.",
     "situacao": "ATIVA",
-    "timestamp": "2025-10-23T13:21:11.886712",
+    "timestamp": "2025-10-23T13:57:26.040007",
     "source": "receita_ws"
   }
 }

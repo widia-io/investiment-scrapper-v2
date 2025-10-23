@@ -25,7 +25,7 @@ from cnpj_lookup import (
 )
 
 
-def enrich_csv_with_cnpj(csv_path, test_mode=False, dry_run=False):
+def enrich_csv_with_cnpj(csv_path, test_mode=False, dry_run=False, use_web_search=True):
     """
     Adiciona coluna CNPJ ao CSV flat.
 
@@ -33,6 +33,7 @@ def enrich_csv_with_cnpj(csv_path, test_mode=False, dry_run=False):
         csv_path: Caminho do CSV a ser enriquecido
         test_mode: Se True, processa apenas 5 linhas
         dry_run: Se True, não salva o CSV (apenas mostra resultado)
+        use_web_search: Se True, usa GPT-4o com web search como fallback
     """
 
     print("=" * 80)
@@ -78,7 +79,7 @@ def enrich_csv_with_cnpj(csv_path, test_mode=False, dry_run=False):
         nome_ativo = row['Ativo']
         print(f"\n[{idx + 1}/{total}] {nome_ativo}")
 
-        resultado = search_cnpj_complete(nome_ativo, cache, verbose=True)
+        resultado = search_cnpj_complete(nome_ativo, cache, verbose=True, use_web_search=use_web_search)
 
         if resultado:
             cnpjs.append(resultado['cnpj'])
@@ -199,13 +200,20 @@ Exemplos:
         help='Simula o processo sem salvar o CSV'
     )
 
+    parser.add_argument(
+        '--no-web-search',
+        action='store_true',
+        help='Desabilita busca web com GPT-4o (mais rápido, mas menos preciso)'
+    )
+
     args = parser.parse_args()
 
     # Executa enriquecimento
     enrich_csv_with_cnpj(
         csv_path=args.csv,
         test_mode=args.test,
-        dry_run=args.dry_run
+        dry_run=args.dry_run,
+        use_web_search=not args.no_web_search
     )
 
 
