@@ -8,7 +8,8 @@ Solução completa para extrair dados de investimentos de relatórios PDF do Bra
 - ✅ Extração automática da tabela "Posição Detalhada dos Investimentos"
 - ✅ Captura de 27/27 investimentos com precisão de 100%
 - ✅ Todos os nomes, valores e datas extraídos corretamente
-- ✅ Exportação em CSV estruturado e JSON hierárquico
+- ✅ Exportação em múltiplos formatos: CSV detalhado, CSV flat, JSON hierárquico
+- ✅ Categorização inteligente com LLM (Tipo de Ativo + Categoria)
 - ✅ Valor total correto: R$ 3.355.273,27 (Renda Fixa + Multimercados)
 - ✅ Robusto - funciona com variações de layout do PDF
 
@@ -20,11 +21,13 @@ investiment-scrapper-v2/
 │   └── bradesco-ativos.pdf                    # Coloque seu PDF aqui
 │
 ├── output/                                     # Arquivos gerados
-│   ├── investimentos_bradesco_llm.csv         # CSV extraído ⭐
-│   └── investimentos_bradesco_llm.json        # JSON hierárquico ⭐
+│   ├── investimentos_bradesco_llm.csv         # CSV detalhado ⭐
+│   ├── investimentos_bradesco_llm.json        # JSON hierárquico ⭐
+│   └── investimentos_bradesco_flat.csv        # CSV flat categorizado ⭐
 │
-├── extract_with_llm_complete.py               # 🤖 Script principal (Python)
-├── extract.sh                                 # 🚀 Wrapper script (Bash)
+├── extract_with_llm_complete.py               # 🤖 Extração do PDF
+├── json_to_flat_csv.py                        # 📊 Conversão para CSV flat
+├── extract.sh                                 # 🚀 Wrapper script
 ├── .env                                       # Configuração (OPENROUTER_API_KEY)
 └── README.md                                  # Documentação
 ```
@@ -62,8 +65,27 @@ python3 extract_with_llm_complete.py
 ```
 
 **Saída**:
-- `output/investimentos_bradesco_llm.csv` - CSV com todos os dados
+- `output/investimentos_bradesco_llm.csv` - CSV detalhado com todos os dados
 - `output/investimentos_bradesco_llm.json` - JSON hierárquico completo
+
+### 4. (Opcional) Converter para CSV Flat Categorizado
+
+Para gerar um CSV flat com categorização inteligente:
+
+```bash
+python3 json_to_flat_csv.py
+```
+
+**Formato do CSV flat**:
+```
+Banco | Ativo | Preço | Valor | Tipo de Ativo | Categoria | Indexador | Taxa % | Vencimento
+```
+
+**Saída**: `output/investimentos_bradesco_flat.csv`
+
+**Categorização com LLM**:
+- **Tipo de Ativo**: CRI, CRA, LCI, LCA, Debênture, LIG, Título Público, Fundo
+- **Categoria**: Crédito Imobiliário, Agronegócio, Infraestrutura, Tesouro IPCA+, Multimercado
 
 
 ## 🤖 Como Funciona a Extração com LLM
