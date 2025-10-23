@@ -1,0 +1,185 @@
+{
+  "name": "PDF Investment Extractor",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "filePath": "/data/input/bradesco-ativos.pdf",
+        "dataPropertyName": "pdfData"
+      },
+      "id": "read-pdf",
+      "name": "Read PDF File",
+      "type": "n8n-nodes-base.readBinaryFile",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Converte o PDF para base64\nconst binaryData = $binary.pdfData;\nconst base64 = binaryData.data;\n\nreturn {\n  json: {\n    pdfBase64: base64,\n    fileName: 'bradesco-ativos.pdf'\n  }\n};"
+      },
+      "id": "prepare-data",
+      "name": "Prepare Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "HTTP-Referer",
+              "value": "http://localhost:5678"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": []
+        },
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"mistralai/mistral-large-latest\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Você é um especialista em extração de dados de documentos financeiros brasileiros. Sua tarefa é extrair TODOS os dados de tabelas de investimentos com 100% de precisão. Retorne APENAS um objeto JSON válido, sem markdown, sem explicações.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Extraia TODOS os dados da tabela 'Posição Detalhada dos Investimentos' deste documento PDF. Para cada linha da tabela, extraia: tipo de renda (PÓS-FIXADO, PRÉ-FIXADO, JURO REAL - INFLAÇÃO, MULTIMERCADOS, ALTERNATIVOS), nome do produto, data de emissão, data de aplicação, data de vencimento, aplicação inicial em R$, tipo de taxa (CDI, PRÉ, IPCA, etc), taxa percentual anual, quantidade, preço atual, valor bruto atual, impostos, alíquota atual, valor líquido atual, participação % PGO, rentabilidade Mês %, rentabilidade Início %. IMPORTANTE: 1) Preserve a formatação de datas brasileiras (DD/MM/AA), 2) Use ponto decimal para números, 3) Não invente dados, 4) Se um campo estiver vazio, use null. Retorne um JSON com a estrutura: { \\\"extracted_data\\\": { \\\"posicao_detalhada\\\": [...], \\\"totais\\\": {...} }, \\\"metadata\\\": {...} }\"\n    }\n  ],\n  \"temperature\": 0.0,\n  \"max_tokens\": 8000\n}",
+        "options": {}
+      },
+      "id": "call-openrouter",
+      "name": "Call OpenRouter API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "openrouter-auth",
+          "name": "OpenRouter Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extrai e valida o JSON da resposta\nconst response = $input.item.json;\n\ntry {\n  const content = response.choices[0].message.content;\n  \n  // Remove markdown code blocks se existirem\n  let jsonStr = content.trim();\n  if (jsonStr.startsWith('```json')) {\n    jsonStr = jsonStr.replace(/```json\\n?/g, '').replace(/```\\n?/g, '');\n  } else if (jsonStr.startsWith('```')) {\n    jsonStr = jsonStr.replace(/```\\n?/g, '');\n  }\n  \n  // Parse do JSON\n  const extractedData = JSON.parse(jsonStr);\n  \n  // Adiciona metadata se não existir\n  if (!extractedData.metadata) {\n    extractedData.metadata = {};\n  }\n  \n  extractedData.metadata.extraction_date = new Date().toISOString();\n  extractedData.metadata.source_file = 'bradesco-ativos.pdf';\n  extractedData.metadata.extractor_model = response.model;\n  \n  return {\n    json: extractedData\n  };\n  \n} catch (error) {\n  throw new Error(`Failed to parse response: ${error.message}. Response: ${JSON.stringify(response)}`);\n}"
+      },
+      "id": "parse-response",
+      "name": "Parse Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "mode": "jsonToBinary",
+        "options": {
+          "fileName": "=bradesco-investimentos-{{$now.format('YYYY-MM-DD_HH-mm-ss')}}.json",
+          "mimeType": "application/json"
+        }
+      },
+      "id": "convert-to-binary",
+      "name": "Convert to Binary",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "fileName": "=/data/output/bradesco-investimentos-{{$now.format('YYYY-MM-DD_HH-mm-ss')}}.json",
+        "dataPropertyName": "data"
+      },
+      "id": "write-file",
+      "name": "Write JSON File",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [1560, 300]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read PDF File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read PDF File": {
+      "main": [
+        [
+          {
+            "node": "Prepare Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Data": {
+      "main": [
+        [
+          {
+            "node": "Call OpenRouter API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call OpenRouter API": {
+      "main": [
+        [
+          {
+            "node": "Parse Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Response": {
+      "main": [
+        [
+          {
+            "node": "Convert to Binary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to Binary": {
+      "main": [
+        [
+          {
+            "node": "Write JSON File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-10-23T12:00:00.000Z",
+  "versionId": "1"
+}

@@ -1,0 +1,130 @@
+{
+  "extracted_data": {
+    "posicao_detalhada": [
+      {
+        "categoria": "PÓS-FIXADO",
+        "produto": "CEI - BROOKFIELD, VIA PORTFÓLIO GLP",
+        "data_emissao": "02/02/24",
+        "data_aplicacao": "02/02/24",
+        "data_vencimento": "22/01/29",
+        "aplicacao_inicial_rs": 100000.00,
+        "taxa_indexador": "CDI_3",
+        "taxa_percentual_anual": 1.50,
+        "quantidade": 100.00,
+        "preco_atual": 1020.84,
+        "valor_bruto_atual": 102084.44,
+        "impostos": 0.00,
+        "aliquota_atual": 0.00,
+        "valor_liquido_atual": 102084.44,
+        "participacao_pgo_percent": 3.04,
+        "rentabilidade_mes_percent": 1.45,
+        "rentabilidade_inicio_percent": 20.89
+      },
+      {
+        "categoria": "PÓS-FIXADO",
+        "produto": "CEI - XALLAS INCORPORAÇÕES E CONSTRUÇÕES S.A.",
+        "data_emissao": "13/06/23",
+        "data_aplicacao": "13/06/23",
+        "data_vencimento": "12/06/26",
+        "aplicacao_inicial_rs": 50000.00,
+        "taxa_indexador": "CDI_4",
+        "taxa_percentual_anual": 2.35,
+        "quantidade": 50.00,
+        "preco_atual": 230.41,
+        "valor_bruto_atual": 11520.53,
+        "impostos": 0.00,
+        "aliquota_atual": 0.00,
+        "valor_liquido_atual": 11520.53,
+        "participacao_pgo_percent": 0.34,
+        "rentabilidade_mes_percent": 2.21,
+        "rentabilidade_inicio_percent": 31.97
+      },
+      {
+        "categoria": "PÓS-FIXADO",
+        "produto": "LCA - BANCO BRADESCO S.A.",
+        "data_emissao": "17/04/25",
+        "data_aplicacao": "17/04/25",
+        "data_vencimento": "01/04/29",
+        "aplicacao_inicial_rs": 80000.00,
+        "taxa_indexador": "CDI",
+        "taxa_percentual_anual": 96.00,
+        "quantidade": 80000.00,
+        "preco_atual": 1.05,
+        "valor_bruto_atual": 83944.61,
+        "impostos": 0.00,
+        "aliquota_atual": 0.00,
+        "valor_liquido_atual": 83944.61,
+        "participacao_pgo_percent": 2.50,
+        "rentabilidade_mes_percent": 1.31,
+        "rentabilidade_inicio_percent": 4.93
+      }
+    ],
+    "pre_fixado": [
+      {
+        "produto": "CEI - ALLOS S.A.",
+        "data_emissao": "17/04/24",
+        "data_aplicacao": "17/04/24",
+        "data_vencimento": "15/04/31",
+        "aplicacao_inicial_rs": 100000.00,
+        "taxa_tipo": "PRÉ",
+        "taxa_percentual_anual": 11.67,
+        "quantidade": 100.00,
+        "preco_atual": 1042.62,
+        "valor_bruto_atual": 104261.72,
+        "impostos": 0.00,
+        "aliquota_atual": 0.00,
+        "valor_liquido_atual": 104261.72,
+        "participacao_pgo_percent": 3.11,
+        "rentabilidade_mes_percent": 1.08,
+        "rentabilidade_inicio_percent": 15.56
+      }
+    ],
+    "juro_real_inflacao": [
+      {
+        "produto": "CRA - JBS S.A.",
+        "data_emissao": "05/10/23",
+        "data_aplicacao": "05/10/23",
+        "data_vencimento": "16/09/30",
+        "aplicacao_inicial_rs": 100000.00,
+        "taxa_tipo": "IPCA",
+        "taxa_percentual_anual": 6.66,
+        "quantidade": 100.00,
+        "preco_atual": 1072.78,
+        "valor_bruto_atual": 107277.97,
+        "impostos": 0.00,
+        "aliquota_atual": 0.00,
+        "valor_liquido_atual": 107277.97,
+        "participacao_pgo_percent": 3.20,
+        "rentabilidade_mes_percent": 3.31,
+        "rentabilidade_inicio_percent": 17.08
+      }
+    ],
+    "multimercados": [
+      {
+        "produto": "KAPITALO K10 FIC MM",
+        "data_emissao": "25/08/21",
+        "aplicacao_inicial_rs": 90042.67,
+        "quantidade": 84919.90,
+        "preco_atual": 1.95,
+        "valor_bruto_atual": 165203.82,
+        "impostos": 818.60,
+        "aliquota_atual": 15.00,
+        "valor_liquido_atual": 164385.22,
+        "participacao_pgo_percent": 4.92,
+        "rentabilidade_mes_percent": 3.31,
+        "rentabilidade_inicio_percent": 83.47
+      }
+    ],
+    "totais": {
+      "valor_bruto_total": 3190069.45,
+      "impostos_total": 178.85,
+      "valor_liquido_total": 3189890.60
+    }
+  },
+  "metadata": {
+    "extraction_date": "2025-10-23T12:00:00.000Z",
+    "source_file": "bradesco-ativos.pdf",
+    "extractor_model": "mistralai/pixtral-12b-2409",
+    "pages_processed": 2
+  }
+}

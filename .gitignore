@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# PDFs sensíveis (podem conter dados pessoais)
+input/*.pdf
+
+# Outputs gerados (podem ser regenerados)
+output/*.csv
+output/*.json
+
+# Manter estrutura de diretórios
+!output/.gitkeep
+!input/.gitkeep
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporários
+tmp/
+temp/
+*.tmp
+
+# Arquivos sensíveis
+.env
+*.sqlite
+*.journal
+
+# N8N data (contém dados sensíveis)
+n8n-data/database.sqlite
+n8n-data/crash.journal
+n8n-data/config
