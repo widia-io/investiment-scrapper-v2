@@ -196,12 +196,12 @@ def add_totals_to_structure(estrutura):
 
 
 def main():
-    csv_path = 'output/investimentos_bradesco_estruturado.csv'
+    csv_path = 'output/investimentos_bradesco_completo.csv'
     json_path = 'output/investimentos_bradesco_final.json'
 
     if not Path(csv_path).exists():
         print(f"\n❌ CSV não encontrado: {csv_path}")
-        print("Execute primeiro: python extract_investment_table_final.py")
+        print("Execute primeiro: python add_names_to_csv.py")
         return
 
     # Converte

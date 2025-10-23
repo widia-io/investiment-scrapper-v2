@@ -50,8 +50,8 @@ def extract_names_from_pdf(pdf_path):
 
                 # Linha com dados
                 if current_section and re.search(r'\d{2}/\d{2}/\d{2}', line_text):
-                    # Extrai nome
-                    nome_match = re.match(r'^([A-Z][^\d]+?)(?=\d{2}/\d{2}/)', line_text)
+                    # Extrai nome (captura tudo até a primeira data)
+                    nome_match = re.match(r'^(.+?)\s+\d{2}/\d{2}/\d{2}', line_text)
 
                     if nome_match:
                         nome = nome_match.group(1).strip()
