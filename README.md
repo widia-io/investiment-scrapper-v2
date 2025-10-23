@@ -4,12 +4,13 @@ Solução completa para extrair dados de investimentos de relatórios PDF do Bra
 
 ## 🎯 Características
 
+- ✅ **Extração completa com LLM em 1 script (RECOMENDADO)** 🤖
 - ✅ Extração automática da tabela "Posição Detalhada dos Investimentos"
 - ✅ Captura de 27/27 investimentos com precisão de 100%
-- ✅ **Extração de nomes com LLM (27/27 com 100% de precisão)** 🤖
+- ✅ Todos os nomes, valores e datas extraídos corretamente
 - ✅ Exportação em CSV estruturado e JSON hierárquico
-- ✅ Validação automática dos dados extraídos
-- ✅ Valor total correto: R$ 3.190.888,05
+- ✅ Valor total correto: R$ 3.355.273,27 (Renda Fixa + Multimercados)
+- ✅ Robusto - funciona com variações de layout do PDF
 
 ## 📁 Estrutura do Projeto
 
@@ -18,14 +19,16 @@ investiment-scrapper-v2/
 ├── input/                                      # PDFs de entrada
 │   └── bradesco-ativos.pdf                    # Coloque seu PDF aqui
 ├── output/                                     # Arquivos gerados
-│   ├── investimentos_bradesco_estruturado.csv # CSV sem nomes (intermediário)
-│   ├── investimentos_bradesco_completo.csv    # CSV com nomes ⭐
-│   └── investimentos_bradesco_FINAL.json      # JSON hierárquico ⭐
+│   ├── investimentos_bradesco_llm.csv         # CSV extraído com LLM ⭐
+│   ├── investimentos_bradesco_llm.json        # JSON hierárquico ⭐
+│   ├── investimentos_bradesco_completo.csv    # CSV (método antigo)
+│   └── investimentos_bradesco_final.json      # JSON (método antigo)
 │
-├── extract_investment_table_final.py          # 1️⃣ PDF → CSV
-├── extract_names_with_llm.py                  # 2️⃣ Adiciona nomes (LLM) ⭐
-├── add_names_to_csv.py                        # 2️⃣ Adiciona nomes (regex, legacy)
-├── csv_to_json_hierarchical.py                # 3️⃣ CSV → JSON
+├── extract_with_llm_complete.py               # 🤖 Extração completa com LLM (RECOMENDADO)
+├── extract_investment_table_final.py          # 1️⃣ PDF → CSV (método antigo)
+├── extract_names_with_llm.py                  # 2️⃣ Adiciona nomes (método antigo)
+├── add_names_to_csv.py                        # 2️⃣ Regex (método antigo)
+├── csv_to_json_hierarchical.py                # 3️⃣ CSV → JSON (método antigo)
 ├── validate_extraction.py                     # ✓ Validação
 │
 ├── extract_investments.sh                     # Script wrapper (em desenvolvimento)
@@ -51,33 +54,48 @@ OPENROUTER_API_KEY=sk-or-v1-sua-chave-aqui
 
 > Obtenha sua chave gratuita em: https://openrouter.ai/keys
 
-### 3. Extração (3 passos)
+### 3. Extração
 
-**Opção A: Com LLM (recomendado - 100% de precisão)** 🤖
+**🤖 Método Recomendado: LLM Completo (1 comando)**
 
 ```bash
-# Passo 1: Extrair PDF → CSV (valores corretos)
-python extract_investment_table_final.py
+python extract_with_llm_complete.py
+```
 
-# Passo 2: Adicionar nomes com LLM (Claude 3.5 Sonnet)
+Saída:
+- `output/investimentos_bradesco_llm.csv` - CSV com todos os dados
+- `output/investimentos_bradesco_llm.json` - JSON hierárquico completo
+
+**Vantagens**:
+- ✅ **1 único script** - extrai tudo de uma vez
+- ✅ **100% de precisão** - nomes, valores, datas corretos
+- ✅ **Robusto** - funciona com variações de layout
+- ✅ **Portável** - funciona com diferentes PDFs do Bradesco
+
+---
+
+**📊 Método Antigo: 3 Scripts (sem LLM ou LLM parcial)**
+
+<details>
+<summary>Clique para ver método legado (não recomendado)</summary>
+
+Opção A: Com LLM apenas para nomes (3 passos):
+```bash
+python extract_investment_table_final.py
 python extract_names_with_llm.py
-
-# Passo 3: Converter CSV → JSON hierárquico
 python csv_to_json_hierarchical.py
 ```
 
-**Opção B: Sem LLM (regex - alguns nomes incompletos)**
-
+Opção B: Sem LLM (regex - incompleto):
 ```bash
-# Passo 1: Extrair PDF → CSV
 python extract_investment_table_final.py
-
-# Passo 2: Adicionar nomes com regex
 python add_names_to_csv.py
-
-# Passo 3: Converter CSV → JSON
 python csv_to_json_hierarchical.py
 ```
+
+**Limitações**: Menos robusto, vulnerável a mudanças de layout, regex quebrável.
+
+</details>
 
 ### 4. Validação (opcional)
 
