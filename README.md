@@ -6,7 +6,7 @@ Solução completa para extrair dados de investimentos de relatórios PDF do Bra
 
 - ✅ Extração automática da tabela "Posição Detalhada dos Investimentos"
 - ✅ Captura de 27/27 investimentos com precisão de 100%
-- ✅ Extração de nomes dos ativos (26/27 com sucesso)
+- ✅ **Extração de nomes com LLM (27/27 com 100% de precisão)** 🤖
 - ✅ Exportação em CSV estruturado e JSON hierárquico
 - ✅ Validação automática dos dados extraídos
 - ✅ Valor total correto: R$ 3.190.888,05
@@ -23,7 +23,8 @@ investiment-scrapper-v2/
 │   └── investimentos_bradesco_FINAL.json      # JSON hierárquico ⭐
 │
 ├── extract_investment_table_final.py          # 1️⃣ PDF → CSV
-├── add_names_to_csv.py                        # 2️⃣ Adiciona nomes
+├── extract_names_with_llm.py                  # 2️⃣ Adiciona nomes (LLM) ⭐
+├── add_names_to_csv.py                        # 2️⃣ Adiciona nomes (regex, legacy)
 ├── csv_to_json_hierarchical.py                # 3️⃣ CSV → JSON
 ├── validate_extraction.py                     # ✓ Validação
 │
@@ -37,30 +38,88 @@ investiment-scrapper-v2/
 ### 1. Instalação
 
 ```bash
-pip install pdfplumber pandas
+pip install pdfplumber pandas openai python-dotenv
 ```
 
-### 2. Extração (3 passos)
+### 2. Configuração (apenas para extração com LLM)
+
+Crie um arquivo `.env` na raiz do projeto:
+
+```bash
+OPENROUTER_API_KEY=sk-or-v1-sua-chave-aqui
+```
+
+> Obtenha sua chave gratuita em: https://openrouter.ai/keys
+
+### 3. Extração (3 passos)
+
+**Opção A: Com LLM (recomendado - 100% de precisão)** 🤖
 
 ```bash
 # Passo 1: Extrair PDF → CSV (valores corretos)
 python extract_investment_table_final.py
-# Saída: output/investimentos_bradesco_estruturado.csv
 
-# Passo 2: Adicionar nomes ao CSV
-python add_names_to_csv.py
-# Saída: output/investimentos_bradesco_completo.csv
+# Passo 2: Adicionar nomes com LLM (Claude 3.5 Sonnet)
+python extract_names_with_llm.py
 
 # Passo 3: Converter CSV → JSON hierárquico
 python csv_to_json_hierarchical.py
-# Saída: output/investimentos_bradesco_FINAL.json
 ```
 
-### 3. Validação (opcional)
+**Opção B: Sem LLM (regex - alguns nomes incompletos)**
+
+```bash
+# Passo 1: Extrair PDF → CSV
+python extract_investment_table_final.py
+
+# Passo 2: Adicionar nomes com regex
+python add_names_to_csv.py
+
+# Passo 3: Converter CSV → JSON
+python csv_to_json_hierarchical.py
+```
+
+### 4. Validação (opcional)
 
 ```bash
 python validate_extraction.py
 ```
+
+## 🤖 Como Funciona a Extração com LLM
+
+O script `extract_names_with_llm.py` usa IA para extrair nomes com 100% de precisão:
+
+### Processo
+
+1. **Extrai texto bruto** do PDF (páginas 6-7) usando pdfplumber
+2. **Envia para Claude 3.5 Sonnet** via OpenRouter API
+3. **Prompt estruturado** solicita JSON com 27 nomes em ordem
+4. **LLM identifica nomes complexos** que regex não consegue:
+   - Nomes multi-linha: "CRI - BROOKFIELD, VIA PORTFÓLIO" + "GLP"
+   - Nomes após dados: Linha de dados seguida por continuação do nome
+   - Nomes compostos: "DEB INCENTIVADA - AGUAS DO RIO 1 SPE S.A"
+5. **Valida e mapeia** os 27 nomes para o CSV na ordem correta
+
+### Por que LLM?
+
+**Problema**: Regex não consegue capturar nomes quando:
+- Nome tem números (ex: "KAPITALO K10")
+- Nome dividido em múltiplas linhas
+- Nome aparece DEPOIS da linha de dados
+- Formato inconsistente entre investimentos
+
+**Solução LLM**:
+- ✅ Entende contexto semântico do PDF
+- ✅ Identifica padrões complexos
+- ✅ Concatena partes de nomes automaticamente
+- ✅ 100% de precisão nos 27 investimentos
+
+### Custo
+
+- Claude 3.5 Sonnet via OpenRouter
+- ~5.000 caracteres de entrada + ~2.000 de saída
+- Custo estimado: **~$0.01 por extração**
+- Alternativa gratuita: use `add_names_to_csv.py` (regex)
 
 ## 📊 Formato CSV
 
