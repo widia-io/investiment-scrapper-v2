@@ -10,6 +10,7 @@ Solução completa para extrair dados de investimentos de relatórios PDF do Bra
 - ✅ Todos os nomes, valores e datas extraídos corretamente
 - ✅ Exportação em múltiplos formatos: CSV detalhado, CSV flat, JSON hierárquico
 - ✅ Categorização inteligente com LLM (Tipo de Ativo + Categoria)
+- ✅ **Enriquecimento com CNPJ** usando busca híbrida (Cache + LLM + API Receita Federal) 🆕
 - ✅ Valor total correto: R$ 3.355.273,27 (Renda Fixa + Multimercados)
 - ✅ Robusto - funciona com variações de layout do PDF
 
@@ -23,11 +24,14 @@ investiment-scrapper-v2/
 ├── output/                                     # Arquivos gerados
 │   ├── investimentos_bradesco_llm.csv         # CSV detalhado ⭐
 │   ├── investimentos_bradesco_llm.json        # JSON hierárquico ⭐
-│   └── investimentos_bradesco_flat.csv        # CSV flat categorizado ⭐
+│   └── investimentos_bradesco_flat.csv        # CSV flat categorizado + CNPJ ⭐
 │
 ├── extract_with_llm_complete.py               # 🤖 Extração do PDF
 ├── json_to_flat_csv.py                        # 📊 Conversão para CSV flat
 ├── apply_business_rules.py                    # 📋 Aplicação de regras de negócio
+├── enrich_with_cnpj.py                        # 🏢 Enriquecimento com CNPJ 🆕
+├── cnpj_lookup.py                             # 📚 Biblioteca de busca de CNPJ 🆕
+├── cnpj_cache.json                            # 💾 Cache de CNPJs (auto-gerado) 🆕
 ├── extract.sh                                 # 🚀 Wrapper script
 ├── .env                                       # Configuração (OPENROUTER_API_KEY)
 └── README.md                                  # Documentação
@@ -38,7 +42,7 @@ investiment-scrapper-v2/
 ### 1. Instalação
 
 ```bash
-pip install pdfplumber pandas openai python-dotenv
+pip install pdfplumber pandas openai python-dotenv requests
 ```
 
 ### 2. Configuração (apenas para extração com LLM)
@@ -79,7 +83,7 @@ python3 json_to_flat_csv.py
 
 **Formato do CSV flat**:
 ```
-Banco | Ativo | Preço | Valor | Tipo de Ativo | Categoria | Indexador | Taxa % | Vencimento
+Banco | Ativo | CNPJ | Razão Social | Preço | Valor | Tipo de Ativo | Categoria | Indexador | Taxa % | Vencimento
 ```
 
 **Saída**: `output/investimentos_bradesco_flat.csv`
@@ -110,6 +114,45 @@ Bradesco  | KAPITALO LONG BIASED FIM             | Fundo de Investimento | Fundo
 ```
 
 **Saída**: Atualiza `output/investimentos_bradesco_flat.csv` com as novas regras aplicadas
+
+### 6. (Opcional) Enriquecer com CNPJ 🆕
+
+Para adicionar a coluna CNPJ das empresas emissoras dos ativos:
+
+```bash
+python3 enrich_with_cnpj.py                    # Processa todos os ativos
+python3 enrich_with_cnpj.py --test             # Modo teste (apenas 5 ativos)
+python3 enrich_with_cnpj.py --dry-run          # Simula sem salvar
+```
+
+**O que faz**:
+- Busca CNPJ de cada empresa emissora usando estratégia híbrida:
+  1. **Cache local** (`cnpj_cache.json`) - instantâneo para ativos já processados
+  2. **LLM** - extrai e normaliza nome da empresa do ativo
+  3. **API Receita Federal** - valida CNPJ oficial (ReceitaWS → BrasilAPI fallback)
+- Adiciona 3 colunas ao CSV flat:
+  - `CNPJ`: CNPJ formatado (XX.XXX.XXX/XXXX-XX)
+  - `Razao_Social`: Nome oficial da empresa
+  - `Situacao_Cadastral`: Status na Receita Federal
+
+**Resultado após enriquecimento**:
+```
+Banco     | Ativo                                | CNPJ                 | Razão Social                        | Valor
+Bradesco  | CRI - BROOKFIELD, VIA PORTFÓLIO GLP  | 07.114.232/0001-19  | BROOKFIELD INCORPORACOES BRASIL SA  | 102.084,44
+Bradesco  | LCI - BANCO BRADESCO S.A.            | 60.746.948/0001-12  | BANCO BRADESCO S.A.                 | 232.051,49
+```
+
+**Saída**: Atualiza `output/investimentos_bradesco_flat.csv` com CNPJs + cria cache `cnpj_cache.json`
+
+**Performance**:
+- **Primeira execução** (~100 ativos): ~33-35 minutos (rate limit API: 3 req/min)
+- **Execuções subsequentes**: instantâneo para ativos já em cache (~95% cache hit)
+- **Custo LLM**: ~$0.03 para 100 ativos (apenas primeira vez)
+
+**Importante**:
+- O script respeita automaticamente rate limits das APIs (20s entre requisições)
+- Cache é salvo incrementalmente (não perde progresso se interromper)
+- Use `--test` para validar com poucos ativos antes de processar todos
 
 
 ## 🤖 Como Funciona a Extração com LLM
@@ -351,11 +394,14 @@ Baseado no PDF de exemplo (Agosto/2025):
 ```
 pdfplumber>=0.11.0
 pandas>=2.0.0
+openai>=1.0.0
+python-dotenv>=1.0.0
+requests>=2.31.0
 ```
 
 Instalação:
 ```bash
-pip install pdfplumber pandas
+pip install pdfplumber pandas openai python-dotenv requests
 ```
 
 ## 📄 Licença
