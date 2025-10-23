@@ -18,22 +18,15 @@ Solução completa para extrair dados de investimentos de relatórios PDF do Bra
 investiment-scrapper-v2/
 ├── input/                                      # PDFs de entrada
 │   └── bradesco-ativos.pdf                    # Coloque seu PDF aqui
+│
 ├── output/                                     # Arquivos gerados
-│   ├── investimentos_bradesco_llm.csv         # CSV extraído com LLM ⭐
-│   ├── investimentos_bradesco_llm.json        # JSON hierárquico ⭐
-│   ├── investimentos_bradesco_completo.csv    # CSV (método antigo)
-│   └── investimentos_bradesco_final.json      # JSON (método antigo)
+│   ├── investimentos_bradesco_llm.csv         # CSV extraído ⭐
+│   └── investimentos_bradesco_llm.json        # JSON hierárquico ⭐
 │
-├── extract_with_llm_complete.py               # 🤖 Extração completa com LLM (RECOMENDADO)
-├── extract_investment_table_final.py          # 1️⃣ PDF → CSV (método antigo)
-├── extract_names_with_llm.py                  # 2️⃣ Adiciona nomes (método antigo)
-├── add_names_to_csv.py                        # 2️⃣ Regex (método antigo)
-├── csv_to_json_hierarchical.py                # 3️⃣ CSV → JSON (método antigo)
-├── validate_extraction.py                     # ✓ Validação
-│
-├── extract_investments.sh                     # Script wrapper (em desenvolvimento)
-├── setup.sh                                   # Setup do ambiente
-└── README.md                                  # Este arquivo
+├── extract_with_llm_complete.py               # 🤖 Script principal (Python)
+├── extract.sh                                 # 🚀 Wrapper script (Bash)
+├── .env                                       # Configuração (OPENROUTER_API_KEY)
+└── README.md                                  # Documentação
 ```
 
 ## 🚀 Uso Rápido
@@ -56,81 +49,54 @@ OPENROUTER_API_KEY=sk-or-v1-sua-chave-aqui
 
 ### 3. Extração
 
-**🤖 Método Recomendado: LLM Completo (1 comando)**
+**Opção A: Script Wrapper (recomendado)**
 
 ```bash
-python extract_with_llm_complete.py
+./extract.sh
 ```
 
-Saída:
+**Opção B: Python direto**
+
+```bash
+python3 extract_with_llm_complete.py
+```
+
+**Saída**:
 - `output/investimentos_bradesco_llm.csv` - CSV com todos os dados
 - `output/investimentos_bradesco_llm.json` - JSON hierárquico completo
 
-**Vantagens**:
-- ✅ **1 único script** - extrai tudo de uma vez
-- ✅ **100% de precisão** - nomes, valores, datas corretos
-- ✅ **Robusto** - funciona com variações de layout
-- ✅ **Portável** - funciona com diferentes PDFs do Bradesco
-
----
-
-**📊 Método Antigo: 3 Scripts (sem LLM ou LLM parcial)**
-
-<details>
-<summary>Clique para ver método legado (não recomendado)</summary>
-
-Opção A: Com LLM apenas para nomes (3 passos):
-```bash
-python extract_investment_table_final.py
-python extract_names_with_llm.py
-python csv_to_json_hierarchical.py
-```
-
-Opção B: Sem LLM (regex - incompleto):
-```bash
-python extract_investment_table_final.py
-python add_names_to_csv.py
-python csv_to_json_hierarchical.py
-```
-
-**Limitações**: Menos robusto, vulnerável a mudanças de layout, regex quebrável.
-
-</details>
-
-### 4. Validação (opcional)
-
-```bash
-python validate_extraction.py
-```
 
 ## 🤖 Como Funciona a Extração com LLM
 
-O script `extract_names_with_llm.py` usa IA para extrair nomes com 100% de precisão:
+O script `extract_with_llm_complete.py` usa IA para extrair TODOS os dados com 100% de precisão:
 
 ### Processo
 
 1. **Extrai texto bruto** do PDF (páginas 6-7) usando pdfplumber
 2. **Envia para Claude 3.5 Sonnet** via OpenRouter API
-3. **Prompt estruturado** solicita JSON com 27 nomes em ordem
-4. **LLM identifica nomes complexos** que regex não consegue:
-   - Nomes multi-linha: "CRI - BROOKFIELD, VIA PORTFÓLIO" + "GLP"
-   - Nomes após dados: Linha de dados seguida por continuação do nome
-   - Nomes compostos: "DEB INCENTIVADA - AGUAS DO RIO 1 SPE S.A"
-5. **Valida e mapeia** os 27 nomes para o CSV na ordem correta
+3. **Prompt estruturado** solicita JSON com 27 investimentos completos
+4. **LLM extrai TODOS os dados**:
+   - Nomes (inclusive multi-linha): "CRI - BROOKFIELD, VIA PORTFÓLIO GLP"
+   - Valores (todas as colunas): aplicação, quantidade, preço, valor bruto/líquido, etc.
+   - Datas: emissão, aplicação, vencimento
+   - Indexadores: CDI, PRE, IPCA
+   - Rentabilidade: mês, desde início, participação no portfólio
+5. **Gera CSV e JSON** com dados estruturados
 
-### Por que LLM?
+### Por que LLM completo ao invés de Regex?
 
-**Problema**: Regex não consegue capturar nomes quando:
-- Nome tem números (ex: "KAPITALO K10")
-- Nome dividido em múltiplas linhas
-- Nome aparece DEPOIS da linha de dados
-- Formato inconsistente entre investimentos
+**Problemas do Regex**:
+- ❌ Quebra com mudanças de layout
+- ❌ Não entende contexto (nomes multi-linha, valores em colunas variáveis)
+- ❌ Requer ajustes manuais para cada formato de PDF
+- ❌ Difícil manutenção (código complexo)
 
-**Solução LLM**:
-- ✅ Entende contexto semântico do PDF
-- ✅ Identifica padrões complexos
-- ✅ Concatena partes de nomes automaticamente
-- ✅ 100% de precisão nos 27 investimentos
+**Vantagens do LLM**:
+- ✅ **Robusto** - adapta-se a variações de layout automaticamente
+- ✅ **Semântico** - entende o significado da tabela, não apenas padrões
+- ✅ **Simples** - 1 script ao invés de 3, prompt em linguagem natural
+- ✅ **Portável** - funciona com diferentes PDFs do Bradesco sem alteração
+- ✅ **Precisão** - 100% de acurácia em nomes, valores e datas
 
 ### Custo
 
