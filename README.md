@@ -27,6 +27,7 @@ investiment-scrapper-v2/
 │
 ├── extract_with_llm_complete.py               # 🤖 Extração do PDF
 ├── json_to_flat_csv.py                        # 📊 Conversão para CSV flat
+├── apply_business_rules.py                    # 📋 Aplicação de regras de negócio
 ├── extract.sh                                 # 🚀 Wrapper script
 ├── .env                                       # Configuração (OPENROUTER_API_KEY)
 └── README.md                                  # Documentação
@@ -83,9 +84,32 @@ Banco | Ativo | Preço | Valor | Tipo de Ativo | Categoria | Indexador | Taxa % 
 
 **Saída**: `output/investimentos_bradesco_flat.csv`
 
-**Categorização com LLM**:
+**Categorização inicial com LLM**:
 - **Tipo de Ativo**: CRI, CRA, LCI, LCA, Debênture, LIG, Título Público, Fundo
 - **Categoria**: Crédito Imobiliário, Agronegócio, Infraestrutura, Tesouro IPCA+, Multimercado
+
+### 5. (Opcional) Aplicar Regras de Negócio
+
+Para ajustar as colunas Categoria e Tipo de Ativo conforme regras de negócio:
+
+```bash
+python3 apply_business_rules.py
+```
+
+**O que faz**:
+- Move o valor de "Tipo de Ativo" para "Categoria" (mantém classificação detalhada)
+- Aplica nova classificação em "Tipo de Ativo" baseada em regras:
+  - **Renda Fixa**: CRI, CRA, DEB, Debênture, CDB, LCI, LCA, LIG, NTN-B, NTN-F, LTN, LFT, Título Público
+  - **Fundo de Investimento**: Fundo, Multimercado
+
+**Resultado após regras de negócio**:
+```
+Banco     | Ativo                                 | Tipo de Ativo         | Categoria  | Valor
+Bradesco  | CRI - BROOKFIELD, VIA PORTFÓLIO GLP  | Renda Fixa            | CRI        | 102.084,44
+Bradesco  | KAPITALO LONG BIASED FIM             | Fundo de Investimento | Fundo      | 165.203,82
+```
+
+**Saída**: Atualiza `output/investimentos_bradesco_flat.csv` com as novas regras aplicadas
 
 
 ## 🤖 Como Funciona a Extração com LLM
