@@ -1,0 +1,138 @@
+{
+  "CRI - BROOKFIELD, VIA PORTFÓLIO GLP": {
+    "empresa": "BROOKFIELD INCORPORACOES BRASIL S.A.",
+    "cnpj": "07.700.557/0001-84",
+    "razao_social": "ERBE INCORPORADORA S.A.",
+    "situacao": "ATIVA",
+    "timestamp": "2025-10-23T14:12:30.762431",
+    "source": "receita_ws_alternative"
+  },
+  "CRI - KALLAS INCORPORAÇÕES E CONSTRUÇÕES S.A.": {
+    "empresa": "KALLAS INCORPORAÇÕES E CONSTRUÇÕES S.A.",
+    "cnpj": "09.146.451/0001-06",
+    "razao_social": "KALLAS INCORPORACOES E CONSTRUCOES S.A.",
+    "situacao": "ATIVA",
+    "timestamp": "2025-10-23T14:12:55.329048",
+    "source": "receita_ws"
+  },
+  "LCA - BANCO BRADESCO S.A.": {
+    "empresa": "BANCO BRADESCO S.A.",
+    "cnpj": "60.746.948/0001-12",
+    "razao_social": "BANCO BRADESCO S.A.",
+    "situacao": "ATIVA",
+    "timestamp": "2025-10-23T14:14:00.533613",
+    "source": "receita_ws"
+  },
+  "LCI - BANCO BRADESCO S.A.": {
+    "empresa": "BANCO BRADESCO S.A.",
+    "cnpj": "60.746.948/0001-12",
+    "razao_social": "BANCO BRADESCO S.A.",
+    "situacao": "ATIVA",
+    "timestamp": "2025-10-23T14:14:25.322768",
+    "source": "receita_ws"
+  },
+  "CRI - LAVVI EMPREENDIMENTOS IMOBILIÁRIOS S.A.": {
+    "empresa": "LAVVI EMPREENDIMENTOS IMOBILIÁRIOS S.A.",
+    "cnpj": "26.462.693/0001-28",
+    "razao_social": "LAVVI EMPREENDIMENTOS IMOBILIARIOS S.A.",
+    "situacao": "ATIVA",
+    "timestamp": "2025-10-23T14:15:03.789097",
+    "source": "receita_ws"
+  },
+  "CRI - SENDAS DISTRIBUIDORA S.A. (ASSAÍ)": {
+    "empresa": "SENDAS DISTRIBUIDORA S.A.",
+    "cnpj": "06.057.223/0001-71",
+    "razao_social": "SENDAS DISTRIBUIDORA S/A",
+    "situacao": "ATIVA",
+    "timestamp": "2025-10-23T14:15:30.296980",
+    "source": "receita_ws"
+  },
+  "DEB INCENTIVADA - ENAUTA PARTICIPACOES S.A.": {
+    "empresa": "ENAUTA PARTICIPACOES S.A.",
+    "cnpj": "11.669.021/0001-10",
+    "razao_social": "ENAUTA PARTICIPACOES S.A.",
+    "situacao": "BAIXADA",
+    "timestamp": "2025-10-23T14:15:56.817447",
+    "source": "receita_ws"
+  },
+  "DEB INCENTIVADA - ENGIE BRASIL ENERGIA S.A.": {
+    "empresa": "ENGIE BRASIL ENERGIA S.A.",
+    "cnpj": "02.474.103/0001-19",
+    "razao_social": "ENGIE BRASIL ENERGIA S.A.",
+    "situacao": "ATIVA",
+    "timestamp": "2025-10-23T14:16:24.001343",
+    "source": "receita_ws"
+  },
+  "LIG - BANCO BRADESCO S.A.": {
+    "empresa": "BANCO BRADESCO S.A.",
+    "cnpj": "60.746.948/0001-12",
+    "razao_social": "BANCO BRADESCO S.A.",
+    "situacao": "ATIVA",
+    "timestamp": "2025-10-23T14:16:48.836968",
+    "source": "receita_ws"
+  },
+  "CRA - JBS S.A.": {
+    "empresa": "JBS S.A.",
+    "cnpj": "02.916.265/0001-60",
+    "razao_social": "JBS S/A",
+    "situacao": "ATIVA",
+    "timestamp": "2025-10-23T14:17:15.898543",
+    "source": "receita_ws"
+  },
+  "CRA - JSL S.A.": {
+    "empresa": "JSL S.A.",
+    "cnpj": "52.548.435/0001-79",
+    "razao_social": "JSL S.A.",
+    "situacao": "ATIVA",
+    "timestamp": "2025-10-23T14:17:41.089707",
+    "source": "receita_ws"
+  },
+  "CRA - MINERVA S.A.": {
+    "empresa": "MINERVA S.A.",
+    "cnpj": "67.620.377/0001-14",
+    "razao_social": "MINERVA S.A.",
+    "situacao": "ATIVA",
+    "timestamp": "2025-10-23T14:18:07.644864",
+    "source": "receita_ws"
+  },
+  "CRI - REDE D'OR SÃO LUIZ S.A.": {
+    "empresa": "REDE D'OR SAO LUIZ S.A.",
+    "cnpj": "06.047.087/0001-39",
+    "razao_social": "REDE D'OR SAO LUIZ S.A.",
+    "situacao": "ATIVA",
+    "timestamp": "2025-10-23T14:18:33.634144",
+    "source": "receita_ws"
+  },
+  "DEB INCENTIVADA - ELET - SECRETARIA DO TESOURO NACION": {
+    "empresa": "SECRETARIA DO TESOURO NACIONAL",
+    "cnpj": "00.394.460/0001-41",
+    "razao_social": "MINISTERIO DA FAZENDA",
+    "situacao": "ATIVA",
+    "timestamp": "2025-10-23T14:20:16.936388",
+    "source": "receita_ws"
+  },
+  "DEB INCENTIVADA - ENERGISA S/A": {
+    "empresa": "ENERGISA S.A.",
+    "cnpj": "00.864.214/0001-06",
+    "razao_social": "ENERGISA S/A",
+    "situacao": "ATIVA",
+    "timestamp": "2025-10-23T14:20:43.666939",
+    "source": "receita_ws"
+  },
+  "NTN-B - SECRETARIA TESOURO NACIONAL": {
+    "empresa": "SECRETARIA DO TESOURO NACIONAL",
+    "cnpj": "00.394.460/0001-41",
+    "razao_social": "MINISTERIO DA FAZENDA",
+    "situacao": "ATIVA",
+    "timestamp": "2025-10-23T14:21:12.001969",
+    "source": "receita_ws"
+  },
+  "KAPITALO K10 FIC MM": {
+    "empresa": "KAPITALO INVESTIMENTOS LTDA",
+    "cnpj": "11.180.009/0001-48",
+    "razao_social": "KAPITALO INVESTIMENTOS LTDA",
+    "situacao": "ATIVA",
+    "timestamp": "2025-10-23T14:21:37.336720",
+    "source": "receita_ws"
+  }
+}

@@ -35,7 +35,7 @@ fi
 # Verifica dependências
 echo -e "${BLUE}🔍 Verificando dependências...${NC}"
 
-for package in pdfplumber pandas openai python-dotenv; do
+for package in pdfplumber pandas openai python-dotenv requests; do
     python3 -c "import ${package//-/_}" 2>/dev/null || {
         echo -e "${YELLOW}⚠️  Instalando $package...${NC}"
         pip3 install -q $package
@@ -69,14 +69,55 @@ python3 extract_with_llm_complete.py
 
 if [ $? -eq 0 ]; then
     echo ""
-    echo "╔══════════════════════════════════════════════════════════════════╗"
-    echo -e "║  ${GREEN}✅ Extração concluída com sucesso!${NC}                          ║"
-    echo "╚══════════════════════════════════════════════════════════════════╝"
+    echo -e "${GREEN}✓ Extração LLM concluída${NC}"
     echo ""
-    echo -e "${GREEN}📁 Arquivos gerados:${NC}"
-    echo "   • output/investimentos_bradesco_llm.csv"
-    echo "   • output/investimentos_bradesco_llm.json"
+
+    # Conversão para CSV flat
+    echo -e "${BLUE}📊 Convertendo para CSV flat...${NC}"
     echo ""
+    python3 json_to_flat_csv.py
+
+    if [ $? -eq 0 ]; then
+        echo ""
+        echo -e "${GREEN}✓ Conversão concluída${NC}"
+        echo ""
+
+        # Aplicação de regras de negócio
+        echo -e "${BLUE}📋 Aplicando regras de negócio...${NC}"
+        echo ""
+        python3 apply_business_rules.py
+
+        if [ $? -eq 0 ]; then
+            echo ""
+            echo -e "${GREEN}✓ Regras de negócio aplicadas${NC}"
+            echo ""
+
+            # Enriquecimento com CNPJ
+            echo -e "${BLUE}🏢 Enriquecendo com CNPJs...${NC}"
+            echo ""
+            python3 enrich_with_cnpj.py
+
+            if [ $? -eq 0 ]; then
+                echo ""
+                echo "╔══════════════════════════════════════════════════════════════════╗"
+                echo -e "║  ${GREEN}✅ Processo completo concluído com sucesso!${NC}                 ║"
+                echo "╚══════════════════════════════════════════════════════════════════╝"
+                echo ""
+                echo -e "${GREEN}📁 Arquivos gerados:${NC}"
+                echo "   • output/investimentos_bradesco_llm.csv       (CSV detalhado)"
+                echo "   • output/investimentos_bradesco_llm.json      (JSON hierárquico)"
+                echo "   • output/investimentos_bradesco_flat.csv      (CSV flat + CNPJ)"
+                echo "   • cnpj_cache.json                             (Cache de CNPJs)"
+                echo ""
+            else
+                echo -e "${YELLOW}⚠️  Enriquecimento com CNPJ falhou (CSV flat ainda disponível)${NC}"
+            fi
+        else
+            echo -e "${YELLOW}⚠️  Regras de negócio falharam${NC}"
+        fi
+    else
+        echo -e "${YELLOW}⚠️  Conversão para CSV flat falhou${NC}"
+    fi
 else
     echo ""
     echo "╔══════════════════════════════════════════════════════════════════╗"
