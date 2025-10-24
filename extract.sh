@@ -21,6 +21,17 @@ if ! command -v python3 &> /dev/null; then
     exit 1
 fi
 
+# Cria e ativa virtual environment
+VENV_DIR="venv"
+if [ ! -d "$VENV_DIR" ]; then
+    echo -e "${BLUE}📦 Criando virtual environment...${NC}"
+    python3 -m venv "$VENV_DIR"
+fi
+
+source "$VENV_DIR/bin/activate"
+echo -e "${GREEN}✓ Virtual environment ativado${NC}"
+echo ""
+
 # Verifica .env
 if [ ! -f .env ]; then
     echo -e "${RED}❌ Arquivo .env não encontrado${NC}"
@@ -38,7 +49,7 @@ echo -e "${BLUE}🔍 Verificando dependências...${NC}"
 for package in pdfplumber pandas openai python-dotenv requests; do
     python3 -c "import ${package//-/_}" 2>/dev/null || {
         echo -e "${YELLOW}⚠️  Instalando $package...${NC}"
-        pip3 install -q $package
+        pip install -q $package
     }
 done
 
