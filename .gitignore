@@ -49,6 +49,9 @@ temp/
 # Cache de CNPJs (opcional - pode commitar se quiser compartilhar cache)
 # cnpj_cache.json
 
+# Proposta Comercial (sensível - manter apenas localmente)
+PROPOSTA_COMERCIAL.md
+
 # N8N data (contém dados sensíveis)
 n8n-data/database.sqlite
 n8n-data/crash.journal
